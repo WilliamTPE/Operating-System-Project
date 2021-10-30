@@ -1,7 +1,7 @@
 /*
 * CS5348.001 Project - 2
 * Group member: William Chang, Ksheeraja Medisetty, Surya Palaniswamy
-* Version: 0.0.1
+* Version: 0.0.2
 */
 
 #include <stdio.h>
@@ -18,9 +18,6 @@
 #define SUPER_BLOCK_SIZE 1024 //1K bytes
 #define DISK_BLOCK_SIZE 1024
 #define INODE_SIZE 64 //64Bytes
-//#define SIZE_OF_FREE_INODE_ARRAY 100
-//#define I_SIZE 100
-//#define SIZE_OF_FREE_ARRAY 254
 #define FREE_SIZE 251
 #define INODES_PER_BLOCK 16 // 1024 / 64 = 16
 #define FILE_NAME_MAX_SIZE 28
@@ -35,8 +32,6 @@ struct superblock
     unsigned int fsize; //file system size in number of blocks, check for bad block numbers (4 Bytes)
     unsigned int nfree; //The number of elements of next array are valid?? (4 Bytes)
     unsigned int free[FREE_SIZE]; //the number of free blocks(block bitmap) 記錄的是使用與未使用的 block 號碼
-    //unsigned int ninode; //the number of free inode (4 Bytes)
-    //unsigned short inode[I_SIZE]; // inode bitmap (inode 對照表), 記錄使用與未使用的 inode 號碼囉
     char flock; // lock during free list manipulation (1 Bytes)
     char ilock; // lock during I list manipulation (1 Bytes)
     char fmod; // super block modified flag (1 Bytes)
@@ -106,6 +101,7 @@ void initfs(char* args){
     for(i = 0; i < FREE_SIZE; i++ ){
         sb.free[i] = 0;
     }
+    // add all blocks to the free array
     sb.nfree = 0;
     
     sb.flock = '0';
