@@ -107,12 +107,7 @@ void initfs(char* args){
         sb.free[i] = 0;
     }
     sb.nfree = 0;
-    sb.ninode = I_SIZE;
-
-    // Initializing the inode array to inode numbers
-    for(i = 0; i < I_SIZE; i++){
-        sb.inode[i] = i + 1;
-    }
+    
 
 
     
