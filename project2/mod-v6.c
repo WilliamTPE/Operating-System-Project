@@ -108,6 +108,11 @@ void initfs(char* args){
     }
     sb.nfree = 0;
     
+    sb.flock = '0';
+    sb.ilock = '0';
+    sb.fmod = '0';
+    sb.time[0] = 0;
+    sb.time[1] = 1970;
 
 
     
