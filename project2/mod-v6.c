@@ -19,7 +19,7 @@
 #define DISK_BLOCK_SIZE 1024
 #define INODE_SIZE 64 //64Bytes
 //#define SIZE_OF_FREE_INODE_ARRAY 100
-#define I_SIZE 100
+//#define I_SIZE 100
 //#define SIZE_OF_FREE_ARRAY 254
 #define FREE_SIZE 251
 #define INODES_PER_BLOCK 16 // 1024 / 64 = 16
@@ -47,7 +47,7 @@ struct superblock
 //the format of i-node
 typedef struct
 {
-    unsigned short flags; //2 Bytes(16Bits)
+    unsigned short flags; //2 Bytes(16Bits) 
     char nlinks; //number of links to file
     char uid; //who own this file
     char gid; //group ID of owner
