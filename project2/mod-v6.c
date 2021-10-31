@@ -1,7 +1,36 @@
 /*
-* CS5348.001 Project - 2
-* Group member: William Chang, Ksheeraja Medisetty, Surya Palaniswamy
-* Version: 0.0.2
+* --------------------------------------------------------------------
+* Class: CS5348.001 
+* Project: Project 2
+* Authors: William Chang, Ksheeraja Medisetty, Surya Palaniswamy
+* Language: C
+* --------------------------------------------------------------------
+*
+* Purpose: Implementation a v6 file system
+*
+* Objectives:
+* 
+*      - openfs
+*         • Open file system
+*      - initfs n1 n2
+*         • Initialize the file system
+*            • n1:  the file system size in number of blocks(fsize)
+*            • n2:  the number of blocks devoted to the i-nodes(isize)
+*         • Set all data block free
+*         • Fill free array, i-list
+*         • Create directory
+*         • Write superblock to the disk
+*      - q
+*         • close file descriptor
+*         • exit the program
+*
+* How to run
+* 
+*   - Compliling
+*     -> gcc -o mod-v6 mod-v6.c
+*
+*   - Execution
+*     -> ./mod-v6
 */
 
 #include <stdio.h>
@@ -15,10 +44,9 @@
 #include <errno.h> //to get system error messages
 
 
-#define SUPER_BLOCK_SIZE 1024 //1K bytes
-#define DISK_BLOCK_SIZE 1024
+#define BLOCK_SIZE 1024 //1K bytes
 #define INODE_SIZE 64 //64Bytes
-#define FREE_SIZE 251
+#define FREE_SIZE 251 // {1023 - 3*(1 Byte - char) + 3*(4 Bytes - int) + 1*(4 Bytes - time[]) } / 4
 #define INODES_PER_BLOCK 16 // 1024 / 64 = 16
 #define FILE_NAME_MAX_SIZE 28
 
@@ -115,9 +143,7 @@ void initfs(char* args){
     
 }
 
-void create_dir(){
-
-}
+void create_dir(){}
 
 void openfs(char* args){
     char* filename;
@@ -137,22 +163,47 @@ void openfs(char* args){
         return;
     }
 
-    lseek(fd, DISK_BLOCK_SIZE, SEEK_SET);
-    read(fd, &sb, SUPER_BLOCK_SIZE);
+    lseek(fd, BLOCK_SIZE, SEEK_SET);
+    read(fd, &sb, BLOCK_SIZE);
     return;
 }
 
-void test(char* args){
-    char* test1;
-    //strtok -> to split the argument
-    args = strtok(NULL, delimiter);
-    test1 = args;
-    printf("1st para: %s\n", test1);
+/*******************************************************************************
+ It takes the block number, data to be written, number of bytes to be written 
+ and writes given data from the starting of the block.
+********************************************************************************/
+long writeToBlock (int blockNumber, void * buffer, int nbytes)
+{
+    lseek(fd, BLOCK_SIZE * blockNumber, SEEK_SET);
+    return write(fd, buffer, nbytes);
+}
 
-    char* test2;
-    args = strtok(NULL, delimiter);
-    test2 = args;
-    printf("2nd para: %s", test2);
+/*******************************************************************************
+ It takes the block number, Offset value, data to be written, number of bytes 
+ to be written and writes given data from the offset value of the block.
+********************************************************************************/
+long writeToBlockOffset(int blockNumber, int offset, void * buffer, int nbytes)
+{
+    lseek(fd,(BLOCK_SIZE * blockNumber) + offset, SEEK_SET); // lseek to offset of the block number
+    return write(fd, buffer, nbytes);
+}
+
+/*******************************************************************************
+ It adds a given block number to free array of the superblock and increments nfree value.
+ If nfree value reaches the free array size, we write the nfree value into the 
+ first 4 bytes and then free array into next 251*4 bytes of the block free[0] 
+ and then set the nfree value to 1
+********************************************************************************/
+void addFreeBlock(int blockNumber){
+    if(superBlock.nfree == FREE_SIZE)
+    {
+        writeToBlock(blockNumber, &superBlock.nfree, 4);
+        superBlock.nfree = 0;
+        //write to the new block
+        writeToBlockOffset(blockNumber, 4, superBlock.free, FREE_SIZE * 4);
+    }
+    superBlock.free[superBlock.nfree] = blockNumber;
+    superBlock.nfree++;
 }
 
 // To check if the file system is loaded or not
